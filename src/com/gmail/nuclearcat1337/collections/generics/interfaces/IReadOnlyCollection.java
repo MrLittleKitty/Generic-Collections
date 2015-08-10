@@ -1,4 +1,4 @@
-package com.gmail.nuclearcat1337.collections.generics;
+package com.gmail.nuclearcat1337.collections.generics.interfaces;
 
 import java.util.Iterator;
 
@@ -7,7 +7,7 @@ import java.util.Iterator;
  */
 public interface IReadOnlyCollection<E> extends Iterable<E>
 {
-    int Count();
+    int getCount();
 
     Iterator<E> iterator();
 }

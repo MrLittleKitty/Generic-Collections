@@ -1,4 +1,4 @@
-package com.gmail.nuclearcat1337.collections.generics;
+package com.gmail.nuclearcat1337.collections.generics.interfaces;
 
 import java.util.Iterator;
 
@@ -7,18 +7,18 @@ import java.util.Iterator;
  */
 public abstract class ICollection<T> implements Iterable<T>
 {
-    public abstract int Count();
+    public abstract int getCount();
 
-    public abstract void Add(T item);
+    public abstract void add(T item);
 
-    public abstract void Clear();
+    public abstract void clear();
 
-    public abstract boolean Contains(T item);
+    public abstract boolean contains(T item);
 
     // CopyTo copies a collection into an Array, starting at a particular
     // index into the array.
     //
-    public abstract void CopyTo(T[] array, int arrayIndex);
+    public abstract void copyTo(T[] array, int arrayIndex);
 
     //void CopyTo(int sourceIndex, T[] destinationArray, int destinationIndex, int count);
 

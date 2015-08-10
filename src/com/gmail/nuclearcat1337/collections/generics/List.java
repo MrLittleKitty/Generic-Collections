@@ -1,9 +1,9 @@
 package com.gmail.nuclearcat1337.collections.generics;
 
-import javax.activation.MailcapCommandMap;
-import java.lang.reflect.Array;
+import com.gmail.nuclearcat1337.collections.generics.interfaces.IList;
+import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyList;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 /*
@@ -22,7 +22,6 @@ public class List<T extends Object> extends IList<T> implements IReadOnlyList<T>
     {
         items = new ArrayList<T>(capacity);
     }
-
 
     @Override
     public T Get(final int index)
