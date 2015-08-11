@@ -18,4 +18,6 @@ public abstract class IDictionary<Key extends Object,Value extends Object>
     public abstract boolean remove(Key key);
 
     public abstract void clear();
+
+    public abstract void add(Key key, Value value);
 }

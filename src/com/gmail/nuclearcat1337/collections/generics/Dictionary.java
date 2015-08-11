@@ -6,6 +6,8 @@ import com.gmail.nuclearcat1337.collections.generics.interfaces.IEqualityCompare
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyCollection;
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyDictionary;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /*
@@ -132,16 +134,13 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
 
 
 
-    @Override
-    public boolean containsKey(final Key key)
-    {
-        return false;
-    }
 
     @Override
     public Value get(final Key key)
     {
-        return null
+        int i = findEntry(key);
+        if (i >= 0) return entries[i].value;
+        return null;
     }
 
     @Override
@@ -159,25 +158,53 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public IReadOnlyCollection<KeyValuePair<Key, Value>> getEntries()
     {
-        ICollection<Key> t;
+        return null;
     }
 
     @Override
-    public boolean ContainsKey(final Key key)
+    public boolean containsKey(final Key key)
     {
         return false;
     }
 
     @Override
-    public boolean Remove(final Key key)
+    public boolean remove(final Key key)
     {
         return false;
+    }
+
+    @Override
+    public void clear()
+    {
+        if (count > 0)
+        {
+            for (int i = 0; i < buckets.length; i++)
+                buckets[i] = -1;
+            ClearArray(entries,0,count);
+            freeList = -1;
+            count = 0;
+            freeCount = 0;
+            version++;
+        }
+    }
+
+    @Override
+    public void add(final Key key, final Value value)
+    {
+
+    }
+
+    private void ClearArray(Object[] array, int startIndex, int length)
+    {
+        int topIndex = startIndex+length;
+        for(int index = startIndex; index < topIndex; index++)
+            array[index] = null;
     }
 
     @Override
     public int getCount()
     {
-        return 0;
+        return count - freeCount;
     }
 
     @Override
