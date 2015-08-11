@@ -124,22 +124,12 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         version++;
     }
 
-
-
-
-
-
-
-
-
-
-
-
     @Override
     public Value get(final Key key)
     {
         int i = findEntry(key);
-        if (i >= 0) return entries[i].value;
+        if (i >= 0)
+            return entries[i].value;
         return null;
     }
 
@@ -164,12 +154,40 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public boolean containsKey(final Key key)
     {
-        return false;
+        return findEntry(key) >= 0;
     }
 
     @Override
     public boolean remove(final Key key)
     {
+        if(key == null)
+            throw new IllegalArgumentException("key cannot be null");
+
+
+        if (buckets != null)
+        {
+            int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
+            int bucket = hashCode % buckets.length;
+            int last = -1;
+            for (int i = buckets[bucket]; i >= 0; last = i, i = entries[i].next)
+            {
+                if (entries[i].hashCode == hashCode && comparer.Equals(entries[i].key, key))
+                {
+                    if (last < 0)
+                        buckets[bucket] = entries[i].next;
+                    else
+                        entries[last].next = entries[i].next;
+                    entries[i].hashCode = -1;
+                    entries[i].next = freeList;
+                    entries[i].key = null;
+                    entries[i].value = null;
+                    freeList = i;
+                    freeCount++;
+                    version++;
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -191,7 +209,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public void add(final Key key, final Value value)
     {
-
+        insert(key,value,true);
     }
 
     private void ClearArray(Object[] array, int startIndex, int length)
@@ -212,6 +230,19 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     {
         return null;
     }
+
+    private class KeyCollection
+    {
+
+    }
+
+    private class ValueCollection
+    {
+
+    }
+
+
+
 
     private class Entry<Key,Value>
     {
