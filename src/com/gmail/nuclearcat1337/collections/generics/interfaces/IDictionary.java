@@ -13,7 +13,9 @@ public abstract class IDictionary<Key extends Object,Value extends Object>
 
     public abstract IReadOnlyCollection<KeyValuePair<Key,Value>> getEntries();
 
-    public abstract boolean ContainsKey(Key key);
+    public abstract boolean containsKey(Key key);
 
-    public abstract boolean Remove(Key key);
+    public abstract boolean remove(Key key);
+
+    public abstract void clear();
 }

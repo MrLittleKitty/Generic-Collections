@@ -22,7 +22,7 @@ public abstract class ICollection<T> implements Iterable<T>
 
     //void CopyTo(int sourceIndex, T[] destinationArray, int destinationIndex, int count);
 
-    public abstract boolean Remove(T item);
+    public abstract boolean remove(T item);
 
     public abstract Iterator<T> iterator();
 }

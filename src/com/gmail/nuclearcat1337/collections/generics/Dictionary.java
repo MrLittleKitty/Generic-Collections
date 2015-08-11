@@ -1,11 +1,11 @@
 package com.gmail.nuclearcat1337.collections.generics;
 
+import com.gmail.nuclearcat1337.collections.generics.interfaces.ICollection;
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IDictionary;
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IEqualityComparer;
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyCollection;
 import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyDictionary;
 
-import javax.activation.MailcapCommandMap;
 import java.util.Iterator;
 
 /*
@@ -39,18 +39,8 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         if(capactiy < 0)
             throw new IllegalArgumentException("Capacity must be greater than zero");
         if(capactiy > 0)
-            Initialize(capactiy);
+            initialize(capactiy);
         this.comparer = comparer != null ? comparer : null;//The default comparer should be used here
-    }
-
-    private void Initialize(int capacity)
-    {
-        int size = capacity;//TODO--Prime size
-        buckets = new int[size];
-        for(int i = 0; i < buckets.length; i++ )
-            buckets[i] = -1;
-        entries = new Entry[size];
-        freeList = -1;
     }
 
     public IEqualityComparer getComparer()
@@ -58,12 +48,39 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         return comparer;
     }
 
+    private void initialize(int capacity)
+    {
+        int size = HashUtil.getPrime(capacity);//TODO--Prime size
+        buckets = new int[size];
+        for(int i = 0; i < buckets.length; i++ )
+            buckets[i] = -1;
+        entries = new Entry[size];
+        freeList = -1;
+    }
+
+    private int findEntry(Key key)
+    {
+        if(key == null)
+            throw new IllegalArgumentException("key cannot be null");
+
+        if (buckets != null)
+        {
+            int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
+            for (int i = buckets[hashCode % buckets.length]; i >= 0; i = entries[i].next)
+            {
+                if (entries[i].hashCode == hashCode && comparer.Equals(entries[i].key, key))
+                    return i;
+            }
+        }
+        return -1;
+    }
+
     private void insert(Key key, Value value, boolean add)
     {
         if (key == null)
             throw new IllegalArgumentException("key cannot be null");
         if (buckets == null)
-            Initialize(0);
+            initialize(0);
         int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
         int targetBucket = hashCode % buckets.length;
 
@@ -115,7 +132,6 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
 
 
 
-
     @Override
     public boolean containsKey(final Key key)
     {
@@ -125,7 +141,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public Value get(final Key key)
     {
-        return null;
+        return null
     }
 
     @Override
@@ -143,7 +159,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public IReadOnlyCollection<KeyValuePair<Key, Value>> getEntries()
     {
-        return null;
+        ICollection<Key> t;
     }
 
     @Override
