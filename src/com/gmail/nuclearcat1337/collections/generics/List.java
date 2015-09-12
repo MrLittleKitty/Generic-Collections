@@ -9,7 +9,7 @@ import java.util.Iterator;
 /*
 Created by Mr_Little_Kitty on 8/8/2015
 */
-public class List<T extends Object> extends IList<T> implements IReadOnlyList<T>
+public class List<T> extends IList<T> implements IReadOnlyList<T>
 {
     private ArrayList<T> items;
 
@@ -24,55 +24,55 @@ public class List<T extends Object> extends IList<T> implements IReadOnlyList<T>
     }
 
     @Override
-    public T Get(final int index)
+    public T get(final int index)
     {
         return items.get(index);
     }
 
     @Override
-    public int IndexOf(final T item)
+    public int indexOf(final T item)
     {
         return items.indexOf(item);
     }
 
     @Override
-    public void Insert(final int index, final T item)
+    public void insert(final int index, final T item)
     {
         items.add(index,item);
     }
 
     @Override
-    public void RemoveAt(final int index)
+    public void removeAt(final int index)
     {
         items.remove(index);
     }
 
     @Override
-    public int Count()
+    public int getCount()
     {
         return items.size();
     }
 
     @Override
-    public void Add(final T item)
+    public void add(final T item)
     {
         items.add(item);
     }
 
     @Override
-    public void Clear()
+    public void clear()
     {
         items.clear();
     }
 
     @Override
-    public boolean Contains(final T item)
+    public boolean contains(final T item)
     {
         return items.contains(item);
     }
 
     @Override
-    public void CopyTo(final T[] array, final int arrayIndex)
+    public void copyTo(final T[] array, final int arrayIndex)
     {
 //        for(int i = 0; i <)
 //        {
@@ -81,7 +81,7 @@ public class List<T extends Object> extends IList<T> implements IReadOnlyList<T>
     }
 
     @Override
-    public boolean Remove(final T item)
+    public boolean remove(final T item)
     {
         return items.remove(item);
     }

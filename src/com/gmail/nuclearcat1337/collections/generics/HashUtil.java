@@ -12,6 +12,7 @@ class HashUtil
             1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369};
 
     private static final int HashPrime = 101;
+    public static final int MaxPrimeArrayLength = 0x7FEFFFFD;
 
     public static int getPrime(int min)
     {
@@ -47,5 +48,20 @@ class HashUtil
             return true;
         }
         return (number == 2);
+    }
+
+    public static int expandPrime(int oldSize)
+    {
+        int newSize = 2 * oldSize;
+
+        // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
+        // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+        if (newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
+        {
+            //Contract.Assert( MaxPrimeArrayLength == GetPrime(MaxPrimeArrayLength), "Invalid MaxPrimeArrayLength");
+            return MaxPrimeArrayLength;
+        }
+
+        return getPrime(newSize);
     }
 }

@@ -124,6 +124,42 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         version++;
     }
 
+    private void copy(Object[] sourceArray, int sourceIndex, Object[] destinationArray, int destinationIndex, int length)
+    {
+        //int max =
+        //for(int i = )
+    }
+
+    private void Resize()
+    {
+        Resize(HashUtil.expandPrime(count), false);
+    }
+
+    private void Resize(int newSize, bool forceNewHashCodes)
+    {
+        //Contract.Assert(newSize >= entries.Length);
+        int[] newBuckets = new int[newSize];
+        for (int i = 0; i < newBuckets.length; i++) newBuckets[i] = -1;
+        Entry[] newEntries = new Entry[newSize];
+        Arrays.copy  Copy(entries, 0, newEntries, 0, count);
+        if(forceNewHashCodes) {
+            for (int i = 0; i < count; i++) {
+                if(newEntries[i].hashCode != -1) {
+                    newEntries[i].hashCode = (comparer.GetHashCode(newEntries[i].key) & 0x7FFFFFFF);
+                }
+            }
+        }
+        for (int i = 0; i < count; i++) {
+            if (newEntries[i].hashCode >= 0) {
+                int bucket = newEntries[i].hashCode % newSize;
+                newEntries[i].next = newBuckets[bucket];
+                newBuckets[bucket] = i;
+            }
+        }
+        buckets = newBuckets;
+        entries = newEntries;
+    }
+
     @Override
     public Value get(final Key key)
     {
@@ -231,20 +267,244 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         return null;
     }
 
-    private class KeyCollection
+    private class Enumerator implements Iterator<KeyValuePair<Key,Value>>
     {
+        private Dictionary<Key,Value> dictionary;
+        private int index;
 
+        public Enumerator(Dictionary<Key,Value> dictionary)
+        {
+            this.dictionary = dictionary;
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return index < dictionary.getCount()-1;
+        }
+
+        @Override
+        public KeyValuePair<Key, Value> next()
+        {
+            if(!hasNext())
+                return null;
+            index++;
+            return new KeyValuePair<Key, Value>(dictionary.entries[index].key,dictionary.entries[index].value);
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify this collection.");
+        }
     }
 
-    private class ValueCollection
+    private final class KeyCollection extends ICollection<Key> implements IReadOnlyCollection<Key>
     {
+        private Dictionary<Key,Value> dictionary;
 
+        public KeyCollection(Dictionary<Key,Value> dictionary)
+        {
+            if(dictionary == null)
+                throw new IllegalArgumentException("dictionary can not be null");
+            this.dictionary = dictionary;
+        }
+
+        @Override
+        public int getCount()
+        {
+            return dictionary.getCount();
+        }
+
+        @Override
+        public void add(final Key item)
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a KeyCollection");
+        }
+
+        @Override
+        public void clear()
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a KeyCollection");
+        }
+
+        @Override
+        public boolean contains(final Key item)
+        {
+            return dictionary.containsKey(item);
+        }
+
+        @Override
+        public void copyTo(final Key[] array, int arrayIndex)
+        {
+            if (array == null)
+                throw new IllegalArgumentException("The given array cannot be null.");
+
+            if (arrayIndex < 0 || arrayIndex > array.length)
+                throw new ArrayIndexOutOfBoundsException("The given index was out of range");
+
+            if (array.length - arrayIndex < dictionary.getCount())
+                throw new ArrayIndexOutOfBoundsException("There is not a space in the array to fit the items");
+
+
+            int count = dictionary.count;
+            //Entry[] entries = dictionary.entries;
+            for (int i = 0; i < count; i++)
+            {
+                if (entries[i].hashCode >= 0)
+                    array[arrayIndex++] = entries[i].key;
+            }
+        }
+
+        @Override
+        public boolean remove(final Key item)
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a KeyCollection");
+        }
+
+        @Override
+        public Iterator<Key> iterator()
+        {
+            return new KeyEnumerator<Key>(dictionary);
+        }
     }
 
+    private class ValueCollection extends ICollection<Value> implements IReadOnlyCollection<Value>
+    {
+        private Dictionary<Key,Value> dictionary;
+
+        public ValueCollection(Dictionary<Key,Value> dictionary)
+        {
+            this.dictionary = dictionary;
+        }
+
+        @Override
+        public int getCount()
+        {
+            return dictionary.getCount();
+        }
+
+        @Override
+        public void add(final Value item)
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a ValueCollection");
+        }
+
+        @Override
+        public void clear()
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a ValueCollection");
+        }
+
+        @Override
+        public boolean contains(final Value item)
+        {
+            return dictionary.containsValue(item);
+        }
+
+        @Override
+        public void copyTo(final Value[] array, int arrayIndex)
+        {
+            if (array == null)
+                throw new IllegalArgumentException("The given array cannot be null.");
+
+            if (arrayIndex < 0 || arrayIndex > array.length)
+                throw new ArrayIndexOutOfBoundsException("The given index was out of range");
+
+            if (array.length - arrayIndex < dictionary.getCount())
+                throw new ArrayIndexOutOfBoundsException("There is not a space in the array to fit the items");
 
 
+            int count = dictionary.count;
+            //Entry[] entries = dictionary.entries;
+            for (int i = 0; i < count; i++)
+            {
+                if (entries[i].hashCode >= 0)
+                    array[arrayIndex++] = entries[i].value;
+            }
+        }
 
-    private class Entry<Key,Value>
+        @Override
+        public boolean remove(final Value item)
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a ValueCollection");
+        }
+
+        @Override
+        public Iterator<Value> iterator()
+        {
+            return new ValueEnumerator<Value>(dictionary);
+        }
+    }
+
+    private final class ValueEnumerator<Value> implements Iterator<Value>
+    {
+        private Dictionary<Key,Value> dictionary;
+        private int index;
+
+        public ValueEnumerator(Dictionary<Key,Value> dictionary)
+        {
+            this.dictionary = dictionary;
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return index < dictionary.getCount()-1;
+        }
+
+        @Override
+        public Value next()
+        {
+            if(!hasNext())
+                return null;
+            index++;
+            return dictionary.entries[index].value;
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a value collection");
+        }
+    }
+
+    private final class KeyEnumerator<Key> implements Iterator<Key>
+    {
+        private Dictionary<Key,Value> dictionary;
+        private int index;
+
+        public KeyEnumerator(Dictionary<Key,Value> dictionary)
+        {
+            this.dictionary = dictionary;
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return index < dictionary.getCount()-1;
+        }
+
+        @Override
+        public Key next()
+        {
+            if(!hasNext())
+                return null;
+            index++;
+            return dictionary.entries[index].key;
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException("You are not allowed to modify a key collection");
+        }
+    }
+
+    private final class Entry
     {
         public int hashCode;
         public int next;

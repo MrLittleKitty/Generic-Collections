@@ -5,8 +5,10 @@ import com.gmail.nuclearcat1337.collections.generics.KeyValuePair;
 /*
 Created by Mr_Little_Kitty on 8/8/2015
 */
-public interface IReadOnlyDictionary<Key extends Object,Value extends Object> extends IReadOnlyCollection<KeyValuePair<Key,Value>>
+public interface IReadOnlyDictionary<Key,Value > extends IReadOnlyCollection<KeyValuePair<Key,Value>>
 {
+    boolean containsValue(Value value);
+
     boolean containsKey(Key key);
 
     Value get(Key key);
