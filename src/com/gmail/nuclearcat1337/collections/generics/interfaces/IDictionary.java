@@ -7,9 +7,9 @@ Created by Mr_Little_Kitty on 8/8/2015
 */
 public abstract class IDictionary<Key,Value>
 {
-    public abstract Iterable<Key> getKeys();
+    public abstract IReadOnlyCollection<Key> getKeys();
 
-    public abstract Iterable<Value> getValues();
+    public abstract IReadOnlyCollection<Value> getValues();
 
     public abstract IReadOnlyCollection<KeyValuePair<Key,Value>> getEntries();
 

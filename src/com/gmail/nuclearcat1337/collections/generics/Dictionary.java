@@ -17,14 +17,15 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
 {
     private int[] buckets;
     private Entry<Key,Value>[] entries;
+    //private Entry[] entries;
     private int count;
     private int version;
     private int freeList;
     private int freeCount;
     private IEqualityComparer<Key> comparer;
 
-    //private KeyCollection keys;
-    //private ValueCollection values;
+    private KeyCollection keys;
+    private ValueCollection values;
 
     public Dictionary()
     {
@@ -42,7 +43,18 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
             throw new IllegalArgumentException("Capacity must be greater than zero");
         if(capactiy > 0)
             initialize(capactiy);
-        this.comparer = comparer != null ? comparer : null;//The default comparer should be used here
+
+        this.keys = new KeyCollection(this);
+        this.values = new ValueCollection(this);
+
+        this.comparer = comparer != null ? comparer : EqualityComparer.DEFAULT;//The default comparer should be used here
+    }
+
+    private void setNullsToDefault(Entry<Key,Value>[] entries)
+    {
+        for(int i = 0; i < entries.length; i++)
+            if(entries[i] == null)
+                entries[i] = new Entry<Key, Value>();
     }
 
     public IEqualityComparer getComparer()
@@ -57,6 +69,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         for(int i = 0; i < buckets.length; i++ )
             buckets[i] = -1;
         entries = new Entry[size];
+        setNullsToDefault(entries);
         freeList = -1;
     }
 
@@ -109,7 +122,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         {
             if (count == entries.length)
             {
-                //Resize();
+                Resize();
                 targetBucket = hashCode % buckets.length;
             }
             index = count;
@@ -124,10 +137,12 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         version++;
     }
 
-    private void copy(Object[] sourceArray, int sourceIndex, Object[] destinationArray, int destinationIndex, int length)
+    private void copy(final Object[] sourceArray, final int sourceIndex, final Object[] destinationArray, final int destinationIndex, final int length)
     {
-        //int max =
-        //for(int i = )
+        for(int i = 0; i < length; i++)
+        {
+            destinationArray[destinationIndex+i] = sourceArray[sourceIndex+i];
+        }
     }
 
     private void Resize()
@@ -135,13 +150,14 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         Resize(HashUtil.expandPrime(count), false);
     }
 
-    private void Resize(int newSize, bool forceNewHashCodes)
+    private void Resize(int newSize, boolean forceNewHashCodes)
     {
         //Contract.Assert(newSize >= entries.Length);
         int[] newBuckets = new int[newSize];
         for (int i = 0; i < newBuckets.length; i++) newBuckets[i] = -1;
-        Entry[] newEntries = new Entry[newSize];
-        Arrays.copy  Copy(entries, 0, newEntries, 0, count);
+        Entry<Key,Value>[] newEntries = new Entry[newSize];
+        copy(entries, 0, newEntries, 0, count);
+        setNullsToDefault(newEntries);
         if(forceNewHashCodes) {
             for (int i = 0; i < count; i++) {
                 if(newEntries[i].hashCode != -1) {
@@ -170,27 +186,49 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     }
 
     @Override
-    public Iterable<Key> getKeys()
+    public IReadOnlyCollection<Key> getKeys()
     {
-        return null;
+        return keys;
     }
 
     @Override
-    public Iterable<Value> getValues()
+    public IReadOnlyCollection<Value> getValues()
     {
-        return null;
+        return values;
     }
 
     @Override
     public IReadOnlyCollection<KeyValuePair<Key, Value>> getEntries()
     {
-        return null;
+        return this;
     }
 
     @Override
     public boolean containsKey(final Key key)
     {
         return findEntry(key) >= 0;
+    }
+
+    @Override
+    public boolean containsValue(final Value value)
+    {
+        if (value == null)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (entries[i].hashCode >= 0 && entries[i].value == null)
+                    return true;
+            }
+        }
+        else
+        {
+            EqualityComparer c = EqualityComparer.DEFAULT;
+            for (int i = 0; i < count; i++)
+            {
+                if (entries[i].hashCode >= 0 && c.Equals(entries[i].value, value))
+                    return true;
+            }
+        } return false;
     }
 
     @Override
@@ -256,6 +294,15 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     }
 
     @Override
+    public boolean contains(final KeyValuePair<Key, Value> item)
+    {
+        Value v = get(item.Key());
+        if(v == null)
+            return false;
+        return EqualityComparer.DEFAULT.Equals(v,item.Value());
+    }
+
+    @Override
     public int getCount()
     {
         return count - freeCount;
@@ -264,7 +311,7 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
     @Override
     public Iterator<KeyValuePair<Key, Value>> iterator()
     {
-        return null;
+        return new Enumerator(this);
     }
 
     private class Enumerator implements Iterator<KeyValuePair<Key,Value>>
@@ -275,22 +322,32 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         public Enumerator(Dictionary<Key,Value> dictionary)
         {
             this.dictionary = dictionary;
-            index = 0;
+            index = -1;
         }
 
         @Override
         public boolean hasNext()
         {
-            return index < dictionary.getCount()-1;
+            int tempIndex = index;
+            while(tempIndex < dictionary.entries.length-1)
+            {
+                if(dictionary.entries[tempIndex+1] != null && dictionary.entries[tempIndex+1].hashCode >= 0)
+                    return true;
+                tempIndex++;
+            }
+            return false;
         }
 
         @Override
         public KeyValuePair<Key, Value> next()
         {
-            if(!hasNext())
-                return null;
-            index++;
-            return new KeyValuePair<Key, Value>(dictionary.entries[index].key,dictionary.entries[index].value);
+            while(index < dictionary.entries.length-1)
+            {
+                index++;
+                if(dictionary.entries[index] != null && dictionary.entries[index].hashCode >= 0)
+                    return new KeyValuePair<Key, Value>(dictionary.entries[index].key,dictionary.entries[index].value);
+            }
+            return null;
         }
 
         @Override
@@ -352,8 +409,8 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
             //Entry[] entries = dictionary.entries;
             for (int i = 0; i < count; i++)
             {
-                if (entries[i].hashCode >= 0)
-                    array[arrayIndex++] = entries[i].key;
+                if (dictionary.entries[i].hashCode >= 0)
+                    array[arrayIndex++] = dictionary.entries[i].key;
             }
         }
 
@@ -420,8 +477,8 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
             //Entry[] entries = dictionary.entries;
             for (int i = 0; i < count; i++)
             {
-                if (entries[i].hashCode >= 0)
-                    array[arrayIndex++] = entries[i].value;
+                if (dictionary.entries[i].hashCode >= 0)
+                    array[arrayIndex++] = dictionary.entries[i].value;
             }
         }
 
@@ -446,22 +503,32 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         public ValueEnumerator(Dictionary<Key,Value> dictionary)
         {
             this.dictionary = dictionary;
-            index = 0;
+            index = -1;
         }
 
         @Override
         public boolean hasNext()
         {
-            return index < dictionary.getCount()-1;
+            int tempIndex = index;
+            while(tempIndex < dictionary.entries.length-1)
+            {
+                if(dictionary.entries[tempIndex+1] != null && dictionary.entries[tempIndex+1].hashCode >= 0)
+                    return true;
+                tempIndex++;
+            }
+            return false;
         }
 
         @Override
         public Value next()
         {
-            if(!hasNext())
-                return null;
-            index++;
-            return dictionary.entries[index].value;
+            while(index < dictionary.entries.length-1)
+            {
+                index++;
+                if(dictionary.entries[index] != null && dictionary.entries[index].hashCode >= 0)
+                    return dictionary.entries[index].value;
+            }
+            return null;
         }
 
         @Override
@@ -479,22 +546,32 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         public KeyEnumerator(Dictionary<Key,Value> dictionary)
         {
             this.dictionary = dictionary;
-            index = 0;
+            index = -1;
         }
 
         @Override
         public boolean hasNext()
         {
-            return index < dictionary.getCount()-1;
+            int tempIndex = index;
+            while(tempIndex < dictionary.entries.length-1)
+            {
+                if(dictionary.entries[tempIndex+1] != null && dictionary.entries[tempIndex+1].hashCode >= 0)
+                    return true;
+                tempIndex++;
+            }
+            return false;
         }
 
         @Override
         public Key next()
         {
-            if(!hasNext())
-                return null;
-            index++;
-            return dictionary.entries[index].key;
+            while(index < dictionary.entries.length-1)
+            {
+                index++;
+                if(dictionary.entries[index] != null && dictionary.entries[index].hashCode >= 0)
+                    return dictionary.entries[index].key;
+            }
+            return null;
         }
 
         @Override
@@ -504,8 +581,14 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         }
     }
 
-    private final class Entry
+    private final class Entry<Key,Value>
     {
+        public Entry()
+        {
+            hashCode = -1;
+            next = -1;
+        }
+
         public int hashCode;
         public int next;
         public Key key;

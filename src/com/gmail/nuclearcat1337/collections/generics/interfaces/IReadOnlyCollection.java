@@ -7,6 +7,8 @@ import java.util.Iterator;
  */
 public interface IReadOnlyCollection<E> extends Iterable<E>
 {
+    boolean contains(E item);
+
     int getCount();
 
     Iterator<E> iterator();
