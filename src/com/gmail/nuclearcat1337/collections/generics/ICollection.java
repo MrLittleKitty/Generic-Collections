@@ -1,4 +1,4 @@
-package com.gmail.nuclearcat1337.collections.generics.interfaces;
+package com.gmail.nuclearcat1337.collections.generics;
 
 import java.util.Iterator;
 

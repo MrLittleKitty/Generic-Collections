@@ -1,8 +1,5 @@
 package com.gmail.nuclearcat1337.collections.generics;
 
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IList;
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyList;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,7 +8,7 @@ Created by Mr_Little_Kitty on 8/8/2015
 */
 public class List<T> extends IList<T> implements IReadOnlyList<T>
 {
-    private ArrayList<T> items;
+    private final ArrayList<T> items;
 
     public List()
     {
@@ -74,10 +71,11 @@ public class List<T> extends IList<T> implements IReadOnlyList<T>
     @Override
     public void copyTo(final T[] array, final int arrayIndex)
     {
-//        for(int i = 0; i <)
-//        {
-//            array[arrayIndex] = items.get()
-//        }
+        int size = getCount();
+        for(int i = 0; i < size;i++)
+        {
+            array[arrayIndex+i] = get(i);
+        }
     }
 
     @Override

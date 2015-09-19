@@ -1,7 +1,5 @@
 package com.gmail.nuclearcat1337.collections.generics;
 
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IEqualityComparer;
-
 /*
 Created by Mr_Little_Kitty on 9/12/2015
 */

@@ -1,4 +1,4 @@
-package com.gmail.nuclearcat1337.collections.generics.interfaces;
+package com.gmail.nuclearcat1337.collections.generics;
 
 /**
  * Created by Mr_Little_Kitty on 8/10/2015.

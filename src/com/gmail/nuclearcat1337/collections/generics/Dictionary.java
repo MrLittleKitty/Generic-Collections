@@ -1,13 +1,5 @@
 package com.gmail.nuclearcat1337.collections.generics;
 
-import com.gmail.nuclearcat1337.collections.generics.interfaces.ICollection;
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IDictionary;
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IEqualityComparer;
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyCollection;
-import com.gmail.nuclearcat1337.collections.generics.interfaces.IReadOnlyDictionary;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /*
