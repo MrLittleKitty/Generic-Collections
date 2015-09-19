@@ -89,6 +89,37 @@ public class List<T> extends IList<T> implements IReadOnlyList<T>
     @Override
     public Iterator<T> iterator()
     {
-        return items.iterator();
+        return new Enumerator(this);
+    }
+
+    private class Enumerator implements Iterator<T>
+    {
+        private List<T> list;
+        private int index;
+
+        public Enumerator(List<T> list)
+        {
+            this.list = list;
+            index = -1;
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return index < list.getCount()-1;
+        }
+
+        @Override
+        public T next()
+        {
+            index++;
+            return list.get(index);
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException("You are not allowed to remove items using this iterator");
+        }
     }
 }
