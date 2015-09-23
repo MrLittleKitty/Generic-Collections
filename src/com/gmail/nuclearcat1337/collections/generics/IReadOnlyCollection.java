@@ -12,4 +12,6 @@ public interface IReadOnlyCollection<E> extends Iterable<E>
     int getCount();
 
     Iterator<E> iterator();
+
+    boolean isEmpty();
 }

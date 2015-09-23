@@ -25,4 +25,9 @@ public abstract class ICollection<T> implements Iterable<T>
     public abstract boolean remove(T item);
 
     public abstract Iterator<T> iterator();
+
+    public boolean isEmpty()
+    {
+        return getCount() <= 0;
+    }
 }

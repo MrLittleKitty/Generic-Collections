@@ -306,6 +306,12 @@ public class Dictionary<Key,Value> extends IDictionary<Key,Value> implements IRe
         return new Enumerator(this);
     }
 
+    @Override
+    public boolean isEmpty()
+    {
+        return getCount() <= 0;
+    }
+
     private class Enumerator implements Iterator<KeyValuePair<Key,Value>>
     {
         private Dictionary<Key,Value> dictionary;
